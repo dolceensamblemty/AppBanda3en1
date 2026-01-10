@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banda 3 en 1 - Agencia Musical Cristiana</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'gold': '#D4AF37',
+                        'gold-light': '#F3E5AB',
+                        'royal-blue': '#1e3a8a',
+                        'dark-bg': '#0f172a',
+                        'soft-white': '#f8fafc'
+                    },
+                    fontFamily: {
+                        'serif': ['Cinzel', 'serif'],
+                        'sans': ['Lato', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8fafc;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Cinzel', serif;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37; 
+            border-radius: 4px;
+        }
+        .modal {
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- ======================= 
+         NAVBAR (PUBLIC) 
+         ======================= -->
+    <nav id="public-nav" class="bg-white/95 backdrop-blur-sm fixed w-full z-50 shadow-sm border-b border-gold/30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center cursor-pointer" onclick="app.navigate('landing')">
+                    <i class="fa-solid fa-music text-gold text-2xl mr-2"></i>
+                    <span class="text-2xl font-bold text-slate-800 brand-font">Banda 3 en 1</span>
+                </div>
+                <div class="flex space-x-6 items-center">
+                    <a href="#servicios" class="hidden md:block text-slate-600 hover:text-gold transition">Servicios</a>
+                    <a href="#videos" class="hidden md:block text-slate-600 hover:text-gold transition">Galería</a>
+                    <button onclick="app.openLoginModal('client')" class="bg-gold hover:bg-yellow-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-user"></i> Acceso Clientes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ======================= 
+         MAIN CONTENT AREA 
+         ======================= -->
+    <main id="app-content" class="flex-grow pt-20">
+        <!-- Views will be injected here via JS -->
+    </main>
+
+    <!-- ======================= 
+         FOOTER 
+         ======================= -->
+    <footer id="public-footer" class="bg-slate-900 text-white py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h3 class="text-2xl brand-font text-gold mb-4">Banda 3 en 1</h3>
+            <p class="text-slate-400 mb-6">Música con propósito para el día más importante de tu vida.</p>
+            <div class="flex justify-center space-x-6 mb-8">
+                <a href="#" class="text-gold hover:text-white transition"><i class="fa-brands fa-instagram text-2xl"></i></a>
+                <a href="#" class="text-gold hover:text-white transition"><i class="fa-brands fa-facebook text-2xl"></i></a>
+                <a href="#" class="text-gold hover:text-white transition"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
+            </div>
+            
+            <!-- Botón discreto para Admin/Músicos -->
+            <div class="mt-10 border-t border-slate-800 pt-6">
+                <button onclick="app.openLoginModal('internal')" class="text-xs text-slate-700 hover:text-slate-500 transition">
+                    <i class="fa-solid fa-lock"></i> Acceso Personal
+                </button>
+                <p class="text-xs text-slate-700 mt-2">&copy; 2024 Banda 3 en 1. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================= 
+         MODALS 
+         ======================= -->
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative fade-in">
+            <button onclick="app.closeModal('login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+            <div class="p-8 text-center">
+                <div class="inline-block p-4 rounded-full bg-gold/10 mb-4">
+                    <i class="fa-solid fa-key text-3xl text-gold"></i>
+                </div>
+                <h3 id="login-title" class="text-2xl font-bold brand-font text-slate-800 mb-2">Acceso Cliente</h3>
+                <p class="text-sm text-slate-500 mb-6">Ingresa tus credenciales para continuar.</p>
+                
+                <form id="login-form" onsubmit="app.handleLogin(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Usuario / ID</label>
+                        <input type="text" id="login-user" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition" placeholder="Ej. 8110474854">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+                        <input type="password" id="login-pass" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition" placeholder="••••••">
+                    </div>
+                    <button type="submit" class="w-full bg-gold hover:bg-yellow-600 text-white py-3 rounded-lg font-bold transition shadow-md">
+                        Entrar <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Modal Container (for Forms) -->
+    <div id="dynamic-modal" class="modal fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative fade-in">
+            <button onclick="app.closeModal('dynamic-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 z-10 bg-white rounded-full p-1">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+            <div id="dynamic-modal-content" class="p-6">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= 
+         JAVASCRIPT LOGIC 
+         ======================= -->
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // --- Configuration ---
+        // Configuración específica del usuario (appbanda3en1)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8U185UsNvqMasoFU-1nN30BwDmz9W0-w",
+            authDomain: "appbanda3en1.firebaseapp.com",
+            projectId: "appbanda3en1",
+            storageBucket: "appbanda3en1.firebasestorage.app",
+            messagingSenderId: "871036012236",
+            appId: "1:871036012236:web:4d8bb3bfce6e0836856469",
+            measurementId: "G-BPW7TZSH3Y"
+        };
+        
+        // Usamos un identificador fijo para la colección en la base de datos de producción
+        const appId = 'banda-3-en-1-prod'; 
+        
+        let db, auth, user, analytics;
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            analytics = getAnalytics(app); // Inicializar Analytics
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase inicializado con appbanda3en1");
+        } catch (e) {
+            console.error("Error inicializando Firebase:", e);
+        }
+
+        // --- Application State ---
+        const state = {
+            view: 'landing', // landing, client-panel, admin-panel, musician-panel
+            userRole: null, // 'admin', 'client', 'musician'
+            currentUserData: null,
+            clients: [],
+            musicians: [],
+            events: [],
+            activeChatId: null
+        };
+
+        // --- Main App Logic Class ---
+        class App {
+            constructor() {
+                this.initAuth();
+            }
+
+            async initAuth() {
+                if(auth) {
+                    try {
+                        // Intentamos iniciar sesión anónima en el proyecto appbanda3en1
+                        // Nota: Debes habilitar "Anonymous" en la pestaña Authentication de tu consola Firebase
+                        await signInAnonymously(auth);
+                        console.log("Autenticación anónima exitosa");
+                    } catch (error) {
+                        console.error("Error de autenticación:", error);
+                        alert("Error de conexión con la base de datos. Verifica que 'Anonymous Auth' esté habilitado en tu consola Firebase.");
+                    }
+                    
+                    onAuthStateChanged(auth, (u) => {
+                        user = u;
+                        if(user) {
+                            // Listeners init after auth
+                            this.setupListeners();
+                        }
+                    });
+                }
+                this.render();
+            }
+
+            setupListeners() {
+                if (!user) return;
+                
+                // Fetch Clients
+                const qClients = query(collection(db, 'artifacts', appId, 'public', 'data', 'clients'));
+                onSnapshot(qClients, (snap) => {
+                    state.clients = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(state.view === 'admin-panel') this.renderAdminDashboard();
+                    if(state.view === 'client-panel' && state.userRole === 'client') {
+                        // Update current client data live
+                        const me = state.clients.find(c => c.username === state.currentUserData.username);
+                        if(me) state.currentUserData = me;
+                        this.renderClientDashboard();
+                    }
+                }, (error) => console.log("Error fetching clients:", error));
+
+                // Fetch Musicians
+                const qMusicians = query(collection(db, 'artifacts', appId, 'public', 'data', 'musicians'));
+                onSnapshot(qMusicians, (snap) => {
+                    state.musicians = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(state.view === 'admin-panel') this.renderAdminDashboard();
+                    if(state.view === 'musician-panel') this.renderMusicianDashboard();
+                }, (error) => console.log("Error fetching musicians:", error));
+
+                // Fetch Chats
+                const qChats = query(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), orderBy('timestamp'));
+                onSnapshot(qChats, (snap) => {
+                    state.messages = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    this.renderChatWidget();
+                }, (error) => console.log("Error fetching messages:", error));
+            }
+
+            // --- Navigation & Views ---
+            navigate(viewName) {
+                state.view = viewName;
+                window.scrollTo(0,0);
+                this.render();
+            }
+
+            render() {
+                const container = document.getElementById('app-content');
+                const nav = document.getElementById('public-nav');
+                const footer = document.getElementById('public-footer');
+
+                // Toggle Nav/Footer visibility based on view
+                if (state.view === 'landing') {
+                    nav.classList.remove('hidden');
+                    footer.classList.remove('hidden');
+                    container.innerHTML = this.getLandingHTML();
+                } else {
+                    nav.classList.add('hidden');
+                    footer.classList.add('hidden');
+                    
+                    if (state.view === 'admin-panel') {
+                        container.innerHTML = this.getAdminPanelHTML();
+                        this.renderAdminDashboard(); // Render tables
+                    } else if (state.view === 'client-panel') {
+                        container.innerHTML = this.getClientPanelHTML();
+                        this.renderClientDashboard();
+                    } else if (state.view === 'musician-panel') {
+                        container.innerHTML = this.getMusicianPanelHTML();
+                        this.renderMusicianDashboard();
+                    }
+                }
+            }
+
+            // --- Authentication Logic (Simulated for specific credentials) ---
+            openLoginModal(type) {
+                const modal = document.getElementById('login-modal');
+                const title = document.getElementById('login-title');
+                const userIn = document.getElementById('login-user');
+                
+                modal.classList.remove('hidden');
+                
+                if (type === 'internal') {
+                    title.innerText = "Acceso Administrativo / Músicos";
+                    userIn.placeholder = "Usuario (ej. admin, musico)";
+                } else {
+                    title.innerText = "Acceso Clientes";
+                    userIn.placeholder = "Teléfono (ej. 8110474854)";
+                }
+                
+                // Store type temporarily
+                modal.dataset.type = type;
+            }
+
+            closeModal(id) {
+                document.getElementById(id).classList.add('hidden');
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                const u = document.getElementById('login-user').value.trim();
+                const p = document.getElementById('login-pass').value.trim();
+                const type = document.getElementById('login-modal').dataset.type;
+
+                // Mock Credential Checks
+                if (type === 'internal') {
+                    if (u === 'admin' && p === '123') {
+                        state.userRole = 'admin';
+                        state.currentUserData = { name: 'Administrador', username: 'admin' };
+                        this.navigate('admin-panel');
+                    } else if (u.toLowerCase().includes('músico') || u === 'musico' && p === '123') {
+                        state.userRole = 'musician';
+                        state.currentUserData = { name: 'Músico Invitado', username: 'musico' };
+                        this.navigate('musician-panel');
+                    } else {
+                        alert("Credenciales incorrectas (Prueba: admin/123 o musico/123)");
+                        return;
+                    }
+                } else {
+                    // Client Login
+                    if (p === '123') {
+                        // Check if client exists in Firestore logic or create a temp session
+                        let client = state.clients.find(c => c.username === u);
+                        
+                        if (!client && u === '8110474854') {
+                            // Demo user fallback if not in DB yet
+                             client = { 
+                                name: "Cliente Demo", 
+                                username: "8110474854", 
+                                eventDate: "2024-12-25",
+                                status: "Confirmado",
+                                totalCost: 15000,
+                                paid: 5000
+                            };
+                        }
+
+                        if(client) {
+                            state.userRole = 'client';
+                            state.currentUserData = client;
+                            this.navigate('client-panel');
+                        } else {
+                             alert("Cliente no encontrado. (Prueba: 8110474854 / 123)");
+                             return;
+                        }
+                    } else {
+                        alert("Contraseña incorrecta (Prueba: 123)");
+                        return;
+                    }
+                }
+                this.closeModal('login-modal');
+            }
+
+            handleLogout() {
+                state.userRole = null;
+                state.currentUserData = null;
+                this.navigate('landing');
+            }
+
+            // --- HTML Generators ---
+
+            getLandingHTML() {
+                return `
+                    <!-- Hero Section -->
+                    <div class="relative h-[600px] flex items-center justify-center text-center text-white">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');"></div>
+                        <div class="absolute inset-0 bg-black/50"></div>
+                        <div class="relative z-10 px-4 fade-in">
+                            <h1 class="text-5xl md:text-7xl font-bold mb-4 drop-shadow-lg text-gold-light">Banda 3 en 1</h1>
+                            <p class="text-xl md:text-2xl font-light mb-8 max-w-2xl mx-auto">Excelencia musical cristiana para celebrar la unión del amor bajo la bendición de Dios.</p>
+                            <button onclick="app.openLoginModal('client')" class="bg-gold hover:bg-yellow-600 text-white px-8 py-3 rounded-full font-bold text-lg transition shadow-lg transform hover:scale-105">
+                                Ver mi Evento
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Services Section -->
+                    <section id="servicios" class="py-20 bg-white">
+                        <div class="max-w-7xl mx-auto px-4">
+                            <h2 class="text-4xl text-center brand-font text-slate-800 mb-12">Nuestros Servicios <span class="text-gold">✞</span></h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <!-- Card 1 -->
+                                <div class="bg-soft-white p-8 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-gold text-center">
+                                    <div class="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="fa-solid fa-church text-2xl text-gold"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold mb-3">Ceremonia Religiosa</h3>
+                                    <p class="text-slate-600">Acompañamiento solemne y espiritual. Repertorio seleccionado para cada momento litúrgico (entrada, ofrenda, comunión, salida).</p>
+                                </div>
+                                <!-- Card 2 -->
+                                <div class="bg-soft-white p-8 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-gold text-center">
+                                    <div class="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="fa-solid fa-glass-cheers text-2xl text-gold"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold mb-3">Recepción & Fiesta</h3>
+                                    <p class="text-slate-600">Música en vivo versátil. Desde jazz instrumental para la cena hasta alabanza y júbilo para celebrar con gozo.</p>
+                                </div>
+                                <!-- Card 3 -->
+                                <div class="bg-soft-white p-8 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-gold text-center">
+                                    <div class="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="fa-solid fa-microphone-lines text-2xl text-gold"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold mb-3">Audio Profesional</h3>
+                                    <p class="text-slate-600">Equipo de sonido de alta fidelidad, iluminación ambiental y micrófonos inalámbricos incluidos en todos los paquetes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Multimedia/Video Section -->
+                    <section id="videos" class="py-20 bg-slate-100">
+                        <div class="max-w-7xl mx-auto px-4">
+                            <h2 class="text-4xl text-center brand-font text-slate-800 mb-12">Galería de Eventos</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="aspect-video bg-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden group cursor-pointer shadow-lg">
+                                    <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&auto=format&fit=crop&w=1469&q=80" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                        <i class="fa-solid fa-play-circle text-6xl text-white opacity-80 group-hover:opacity-100 transition"></i>
+                                    </div>
+                                </div>
+                                <div class="aspect-video bg-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden group cursor-pointer shadow-lg">
+                                    <img src="https://images.unsplash.com/photo-1465847899078-b413929f7120?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                        <i class="fa-solid fa-play-circle text-6xl text-white opacity-80 group-hover:opacity-100 transition"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+
+            getAdminPanelHTML() {
+                return `
+                    <div class="flex h-screen bg-slate-100 overflow-hidden">
+                        <!-- Sidebar -->
+                        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+                            <div class="p-6 text-center border-b border-slate-700">
+                                <h2 class="brand-font text-gold text-xl font-bold">Panel Admin</h2>
+                                <p class="text-xs text-slate-400 mt-1">Banda 3 en 1</p>
+                            </div>
+                            <nav class="flex-1 p-4 space-y-2">
+                                <button onclick="app.setAdminTab('clients')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition flex items-center"><i class="fa-solid fa-users w-8 text-gold"></i> Clientes</button>
+                                <button onclick="app.setAdminTab('musicians')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition flex items-center"><i class="fa-solid fa-guitar w-8 text-gold"></i> Músicos</button>
+                                <button onclick="app.setAdminTab('finance')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition flex items-center"><i class="fa-solid fa-file-invoice-dollar w-8 text-gold"></i> Pagos</button>
+                                <button onclick="app.setAdminTab('calendar')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition flex items-center"><i class="fa-solid fa-calendar-days w-8 text-gold"></i> Calendario</button>
+                            </nav>
+                            <div class="p-4 border-t border-slate-700">
+                                <button onclick="app.handleLogout()" class="w-full text-left px-4 py-2 text-red-400 hover:text-red-300"><i class="fa-solid fa-sign-out-alt mr-2"></i> Salir</button>
+                            </div>
+                        </aside>
+
+                        <!-- Mobile Header -->
+                        <div class="md:hidden fixed top-0 w-full bg-slate-900 text-white z-40 flex justify-between p-4 items-center">
+                            <span>Admin Panel</span>
+                            <button onclick="app.handleLogout()"><i class="fa-solid fa-sign-out-alt"></i></button>
+                        </div>
+
+                        <!-- Content -->
+                        <main class="flex-1 overflow-y-auto p-4 md:p-8 mt-14 md:mt-0 relative">
+                             <!-- Tab Content gets injected here -->
+                             <div id="admin-content"></div>
+                        </main>
+                    </div>
+                `;
+            }
+
+            getClientPanelHTML() {
+                const c = state.currentUserData || {};
+                const balance = (c.totalCost || 0) - (c.paid || 0);
+                
+                return `
+                    <div class="min-h-screen bg-slate-50 pb-20">
+                        <header class="bg-royal-blue text-white p-6 shadow-md">
+                            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                                <div>
+                                    <h1 class="text-2xl brand-font">Hola, ${c.name} 👋</h1>
+                                    <p class="text-sm opacity-80">Fecha del evento: ${c.eventDate || 'Por definir'}</p>
+                                </div>
+                                <button onclick="app.handleLogout()" class="text-sm bg-white/20 px-3 py-1 rounded hover:bg-white/30 transition">Salir</button>
+                            </div>
+                        </header>
+
+                        <div class="max-w-4xl mx-auto px-4 mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            
+                            <!-- Estatus Card -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gold">
+                                <h3 class="text-sm font-bold text-slate-500 uppercase">Estatus del Evento</h3>
+                                <p class="text-2xl font-bold text-slate-800 mt-2">${c.status || 'En Prospección'}</p>
+                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                    <div class="flex justify-between text-sm mb-1"><span>Total:</span> <span class="font-bold">$${c.totalCost || 0}</span></div>
+                                    <div class="flex justify-between text-sm mb-1"><span>Pagado:</span> <span class="text-green-600 font-bold">$${c.paid || 0}</span></div>
+                                    <div class="flex justify-between text-sm"><span>Restante:</span> <span class="text-red-500 font-bold">$${balance}</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Tabs for Client -->
+                            <div class="md:col-span-2 space-y-6">
+                                
+                                <!-- Form Section -->
+                                <div class="bg-white rounded-xl shadow-sm p-6">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h2 class="text-xl font-bold brand-font text-slate-800"><i class="fa-solid fa-pen-to-square text-gold mr-2"></i> Detalles del Evento</h2>
+                                        <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Tiempo Límite: 5 días</span>
+                                    </div>
+                                    
+                                    <form id="client-event-form" onsubmit="app.updateClientDetails(event)">
+                                        <!-- General -->
+                                        <div class="mb-6 bg-slate-50 p-4 rounded-lg">
+                                            <h4 class="font-bold text-royal-blue mb-3 border-b pb-1">Datos Generales</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <input type="text" name="groomNames" placeholder="Nombres Novios" class="w-full p-2 border rounded" value="${c.details?.groomNames || ''}">
+                                                <input type="text" name="address" placeholder="Dirección del Lugar" class="w-full p-2 border rounded" value="${c.details?.address || ''}">
+                                                <input type="text" name="mapLink" placeholder="Link Google Maps" class="w-full p-2 border rounded md:col-span-2" value="${c.details?.mapLink || ''}">
+                                            </div>
+                                        </div>
+
+                                        <!-- Ceremonia -->
+                                        <div class="mb-6 bg-slate-50 p-4 rounded-lg">
+                                            <h4 class="font-bold text-royal-blue mb-3 border-b pb-1">Ceremonia Religiosa</h4>
+                                            <div class="grid grid-cols-1 gap-3">
+                                                <input type="text" name="pastor" placeholder="Nombre del Pastor/Oficiante" class="w-full p-2 border rounded" value="${c.details?.pastor || ''}">
+                                                <input type="text" name="songEntry" placeholder="Canción Entrada Novios" class="w-full p-2 border rounded" value="${c.details?.songEntry || ''}">
+                                                <input type="text" name="songExit" placeholder="Marcha de Salida" class="w-full p-2 border rounded" value="${c.details?.songExit || ''}">
+                                            </div>
+                                        </div>
+
+                                        <!-- Recepción -->
+                                        <div class="mb-6 bg-slate-50 p-4 rounded-lg">
+                                            <h4 class="font-bold text-royal-blue mb-3 border-b pb-1">Recepción & Dinámicas</h4>
+                                            <div class="space-y-2 mb-4">
+                                                <label class="flex items-center space-x-2">
+                                                    <input type="checkbox" name="vibora" ${c.details?.vibora ? 'checked' : ''}> <span>Víbora de la Mar</span>
+                                                </label>
+                                                <label class="flex items-center space-x-2">
+                                                    <input type="checkbox" name="ramo" ${c.details?.ramo ? 'checked' : ''}> <span>Lanzamiento de Ramo</span>
+                                                </label>
+                                                <label class="flex items-center space-x-2">
+                                                    <input type="checkbox" name="billete" ${c.details?.billete ? 'checked' : ''}> <span>Baile del Billete</span>
+                                                </label>
+                                            </div>
+                                            <textarea name="genres" placeholder="Géneros musicales preferidos..." class="w-full p-2 border rounded h-20">${c.details?.genres || ''}</textarea>
+                                        </div>
+
+                                        <button type="submit" class="bg-royal-blue text-white px-6 py-2 rounded shadow hover:bg-blue-800 transition w-full">Guardar Información</button>
+                                    </form>
+                                </div>
+
+                                <!-- Chat Section -->
+                                <div class="bg-white rounded-xl shadow-sm p-6">
+                                    <h2 class="text-xl font-bold brand-font text-slate-800 mb-4"><i class="fa-solid fa-comments text-gold mr-2"></i> Mensajes con Admin</h2>
+                                    <div id="client-chat-box" class="h-60 overflow-y-auto bg-slate-50 rounded border border-gray-200 p-4 mb-3 flex flex-col space-y-2">
+                                        <!-- Messages injected here -->
+                                    </div>
+                                    <form onsubmit="app.sendMessage(event, 'admin')" class="flex gap-2">
+                                        <input type="text" id="msg-input-client" class="flex-1 border rounded px-3 py-2 outline-none focus:border-gold" placeholder="Escribe tu duda..." required>
+                                        <button type="submit" class="bg-gold text-white px-4 py-2 rounded"><i class="fa-solid fa-paper-plane"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getMusicianPanelHTML() {
+                const m = state.currentUserData;
+                // Filter events assigned to musicians (mock logic: all confirmed events)
+                const myEvents = state.clients.filter(c => c.status === 'Confirmado');
+
+                return `
+                    <div class="min-h-screen bg-slate-50">
+                        <nav class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg">
+                            <span class="font-bold brand-font text-gold">Panel Músico</span>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm">${m.name} (${m.username})</span>
+                                <button onclick="app.handleLogout()" class="text-xs text-red-300 border border-red-300 px-2 py-1 rounded">Salir</button>
+                            </div>
+                        </nav>
+                        <div class="max-w-3xl mx-auto p-4 md:p-8">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-6">Próximos Eventos Asignados</h2>
+                            <div class="space-y-4">
+                                ${myEvents.length === 0 ? '<p class="text-gray-500 italic">No tienes eventos confirmados próximamente.</p>' : ''}
+                                ${myEvents.map(e => `
+                                    <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h3 class="font-bold text-lg">${e.details?.groomNames || 'Boda'}</h3>
+                                                <p class="text-slate-600"><i class="fa-regular fa-calendar mr-2"></i>${e.eventDate}</p>
+                                                <p class="text-slate-600"><i class="fa-solid fa-location-dot mr-2"></i>${e.details?.address || 'Por definir'}</p>
+                                            </div>
+                                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Confirmado</span>
+                                        </div>
+                                        <div class="mt-3 pt-3 border-t border-gray-100 text-sm text-slate-500">
+                                            <p><strong>Repertorio:</strong> ${e.details?.genres || 'Estándar'}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                             <!-- Chat Section for Musician -->
+                             <div class="bg-white rounded-xl shadow-sm p-6 mt-8">
+                                <h2 class="text-xl font-bold brand-font text-slate-800 mb-4"><i class="fa-solid fa-comments text-gold mr-2"></i> Chat General</h2>
+                                <div id="musician-chat-box" class="h-40 overflow-y-auto bg-slate-50 rounded border border-gray-200 p-4 mb-3 flex flex-col space-y-2">
+                                    <!-- Messages injected here -->
+                                </div>
+                                <form onsubmit="app.sendMessage(event, 'admin')" class="flex gap-2">
+                                    <input type="text" id="msg-input-musician" class="flex-1 border rounded px-3 py-2 outline-none focus:border-gold" placeholder="Mensaje al admin..." required>
+                                    <button type="submit" class="bg-gold text-white px-4 py-2 rounded"><i class="fa-solid fa-paper-plane"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- Admin Dashboard Sub-views ---
+
+            setAdminTab(tab) {
+                const content = document.getElementById('admin-content');
+                
+                // --- CLIENTS TAB ---
+                if (tab === 'clients') {
+                    content.innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-slate-800">Gestión de Clientes</h2>
+                            <button onclick="app.openAddClientModal()" class="bg-royal-blue text-white px-4 py-2 rounded shadow hover:bg-blue-800"><i class="fa-solid fa-plus mr-2"></i> Nuevo Cliente</button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-50 text-slate-700 font-bold uppercase">
+                                    <tr>
+                                        <th class="px-6 py-3">Nombre</th>
+                                        <th class="px-6 py-3">Teléfono (User)</th>
+                                        <th class="px-6 py-3">Fecha Evento</th>
+                                        <th class="px-6 py-3">Estatus</th>
+                                        <th class="px-6 py-3">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    ${state.clients.map(c => `
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="px-6 py-4 font-medium">${c.name}</td>
+                                            <td class="px-6 py-4">${c.username}</td>
+                                            <td class="px-6 py-4">${c.eventDate}</td>
+                                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs ${c.status === 'Confirmado' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${c.status}</span></td>
+                                            <td class="px-6 py-4">
+                                                <button onclick="app.deleteClient('${c.id}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                // --- MUSICIANS TAB ---
+                else if (tab === 'musicians') {
+                    content.innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-slate-800">Músicos</h2>
+                            <button onclick="app.openAddMusicianModal()" class="bg-royal-blue text-white px-4 py-2 rounded shadow hover:bg-blue-800"><i class="fa-solid fa-plus mr-2"></i> Nuevo Músico</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${state.musicians.map(m => `
+                                <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition relative">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-bold text-xl">${m.name[0]}</div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800">${m.name}</h4>
+                                            <p class="text-sm text-gold font-semibold">${m.instrument}</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-gray-100 text-sm space-y-1">
+                                        <p><i class="fa-solid fa-phone text-gray-400 mr-2"></i> ${m.phone}</p>
+                                        <p><span class="inline-block w-2 h-2 rounded-full ${m.active ? 'bg-green-500' : 'bg-red-500'} mr-2"></span> ${m.active ? 'Activo' : 'Inactivo'}</p>
+                                    </div>
+                                    <button onclick="app.deleteMusician('${m.id}')" class="absolute top-4 right-4 text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                         <!-- Chat General con Musicos -->
+                         <div class="bg-white rounded-xl shadow-sm p-6 mt-8">
+                            <h2 class="text-xl font-bold brand-font text-slate-800 mb-4"><i class="fa-solid fa-comments text-gold mr-2"></i> Chat General Músicos</h2>
+                            <div id="admin-chat-box" class="h-40 overflow-y-auto bg-slate-50 rounded border border-gray-200 p-4 mb-3 flex flex-col space-y-2">
+                                <!-- Messages injected here -->
+                            </div>
+                            <form onsubmit="app.sendMessage(event, 'musicians')" class="flex gap-2">
+                                <input type="text" id="msg-input-admin" class="flex-1 border rounded px-3 py-2 outline-none focus:border-gold" placeholder="Mensaje a todos los músicos..." required>
+                                <button type="submit" class="bg-gold text-white px-4 py-2 rounded"><i class="fa-solid fa-paper-plane"></i></button>
+                            </form>
+                        </div>
+                    `;
+                    this.renderChatWidget();
+                }
+
+                // --- FINANCE TAB ---
+                else if (tab === 'finance') {
+                    content.innerHTML = `
+                         <h2 class="text-2xl font-bold text-slate-800 mb-6">Finanzas y Pagos</h2>
+                         <div class="bg-white rounded-lg shadow overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-50 text-slate-700 font-bold">
+                                    <tr>
+                                        <th class="px-6 py-3">Cliente</th>
+                                        <th class="px-6 py-3">Evento</th>
+                                        <th class="px-6 py-3 text-right">Total</th>
+                                        <th class="px-6 py-3 text-right">Anticipo</th>
+                                        <th class="px-6 py-3 text-right">Saldo</th>
+                                        <th class="px-6 py-3">Estatus</th>
+                                        <th class="px-6 py-3">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    ${state.clients.map(c => {
+                                        const saldo = (c.totalCost || 0) - (c.paid || 0);
+                                        return `
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="px-6 py-4 font-medium">${c.name}</td>
+                                            <td class="px-6 py-4">${c.eventDate}</td>
+                                            <td class="px-6 py-4 text-right">$${c.totalCost}</td>
+                                            <td class="px-6 py-4 text-right text-green-600">$${c.paid}</td>
+                                            <td class="px-6 py-4 text-right font-bold ${saldo > 0 ? 'text-red-500' : 'text-gray-400'}">$${saldo}</td>
+                                            <td class="px-6 py-4">
+                                                <select onchange="app.updateStatus('${c.id}', this.value)" class="bg-gray-50 border border-gray-300 text-xs rounded p-1">
+                                                    <option ${c.status === 'Prospección' ? 'selected' : ''}>Prospección</option>
+                                                    <option ${c.status === 'Confirmado' ? 'selected' : ''}>Confirmado</option>
+                                                    <option ${c.status === 'Concluido' ? 'selected' : ''}>Concluido</option>
+                                                    <option ${c.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                                                </select>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                 <button onclick="app.registerPayment('${c.id}')" class="text-blue-600 hover:text-blue-800 text-xs underline">Registrar Pago</button>
+                                            </td>
+                                        </tr>
+                                    `}).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-6 p-4 bg-yellow-50 rounded border border-yellow-200">
+                            <h4 class="font-bold text-yellow-800 text-sm">Información de Pago (Visible para clientes)</h4>
+                            <textarea class="w-full mt-2 p-2 text-sm border rounded" rows="3">Banco: BBVA \nCuenta: 1234567890 \nBeneficiario: Banda 3 en 1</textarea>
+                        </div>
+                    `;
+                }
+
+                // --- CALENDAR TAB ---
+                else if (tab === 'calendar') {
+                     // Simple list view sorted by date
+                     const sortedEvents = [...state.clients].sort((a,b) => new Date(a.eventDate) - new Date(b.eventDate));
+                     
+                     content.innerHTML = `
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Calendario de Eventos</h2>
+                        <div class="space-y-4">
+                             ${sortedEvents.map(e => `
+                                <div class="flex bg-white p-4 rounded shadow border-l-4 ${e.status === 'Confirmado' ? 'border-green-500' : 'border-gray-300'}">
+                                    <div class="flex-shrink-0 w-20 text-center border-r border-gray-200 pr-4 flex flex-col justify-center">
+                                        <span class="text-2xl font-bold text-slate-800 block">${new Date(e.eventDate).getDate() || '--'}</span>
+                                        <span class="text-xs text-slate-500 uppercase">${new Date(e.eventDate).toLocaleString('es-ES', { month: 'short' }) || ''}</span>
+                                    </div>
+                                    <div class="pl-4 flex-1">
+                                        <h3 class="font-bold text-lg">${e.name}</h3>
+                                        <p class="text-sm text-slate-500">${e.details?.address || 'Ubicación pendiente'}</p>
+                                        <span class="inline-block mt-2 text-xs px-2 py-1 bg-gray-100 rounded">${e.status}</span>
+                                    </div>
+                                </div>
+                             `).join('')}
+                        </div>
+                     `;
+                }
+            }
+
+            renderAdminDashboard() {
+                // Determine which tab is active or default to clients
+                const currentContent = document.getElementById('admin-content');
+                if(!currentContent.innerHTML.trim()) this.setAdminTab('clients');
+            }
+            
+            renderClientDashboard() {
+                 this.renderChatWidget();
+            }
+
+            renderMusicianDashboard() {
+                this.renderChatWidget();
+            }
+
+            renderChatWidget() {
+                // This function renders messages into the active chat box based on view/role
+                const msgs = state.messages || [];
+                let boxId = '';
+                let filterFn = () => false;
+
+                if (state.view === 'client-panel') {
+                    boxId = 'client-chat-box';
+                    // Client sees their own msgs and Admin msgs
+                    filterFn = (m) => (m.sender === state.currentUserData.username && m.receiver === 'admin') || (m.sender === 'admin' && m.receiver === state.currentUserData.username);
+                } else if (state.view === 'musician-panel') {
+                    boxId = 'musician-chat-box';
+                     // Musician sees General chat
+                    filterFn = (m) => m.receiver === 'musicians';
+                } else if (state.view === 'admin-panel') {
+                     // Admin logic: For simplicity in this view, showing musicians chat in musicians tab
+                     boxId = 'admin-chat-box';
+                     filterFn = (m) => m.receiver === 'musicians';
+                }
+
+                const box = document.getElementById(boxId);
+                if (!box) return;
+
+                const filtered = msgs.filter(filterFn);
+                box.innerHTML = filtered.map(m => {
+                    const isMe = m.sender === state.currentUserData.username || (state.userRole === 'admin' && m.sender === 'admin');
+                    return `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                            <div class="${isMe ? 'bg-gold text-white' : 'bg-white text-slate-800 border'} px-3 py-2 rounded-lg text-sm max-w-[80%] shadow-sm">
+                                <p class="font-bold text-xs opacity-70 mb-1">${m.senderName}</p>
+                                <p>${m.text}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                box.scrollTop = box.scrollHeight;
+            }
+
+
+            // --- ACTIONS (CRUD) ---
+            
+            openAddClientModal() {
+                const modal = document.getElementById('dynamic-modal');
+                const content = document.getElementById('dynamic-modal-content');
+                modal.classList.remove('hidden');
+                
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">Registrar Nuevo Cliente</h3>
+                    <form onsubmit="app.createClient(event)" class="space-y-4">
+                        <input type="text" id="new-client-name" placeholder="Nombre Completo" required class="w-full border p-2 rounded">
+                        <input type="text" id="new-client-phone" placeholder="Teléfono (Será su Usuario)" required class="w-full border p-2 rounded">
+                        <input type="date" id="new-client-date" required class="w-full border p-2 rounded">
+                        <input type="number" id="new-client-cost" placeholder="Costo Total ($)" required class="w-full border p-2 rounded">
+                        <button type="submit" class="w-full bg-gold text-white py-2 rounded font-bold">Registrar</button>
+                    </form>
+                `;
+            }
+
+            async createClient(e) {
+                e.preventDefault();
+                const name = document.getElementById('new-client-name').value;
+                const phone = document.getElementById('new-client-phone').value;
+                const date = document.getElementById('new-client-date').value;
+                const cost = document.getElementById('new-client-cost').value;
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), {
+                    name,
+                    username: phone, // This is the ID for login
+                    eventDate: date,
+                    totalCost: Number(cost),
+                    paid: 0,
+                    status: 'Prospección',
+                    createdAt: new Date().toISOString()
+                });
+                
+                this.closeModal('dynamic-modal');
+                this.setAdminTab('clients'); // Refresh
+            }
+            
+            async updateClientDetails(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const details = {};
+                formData.forEach((value, key) => details[key] = value);
+                
+                // Add Checkboxes manually
+                details.vibora = e.target.vibora.checked;
+                details.ramo = e.target.ramo.checked;
+                details.billete = e.target.billete.checked;
+
+                const clientRef = doc(db, 'artifacts', appId, 'public', 'data', 'clients', state.currentUserData.id);
+                await updateDoc(clientRef, { details });
+                
+                alert('Información guardada correctamente.');
+            }
+
+            openAddMusicianModal() {
+                const modal = document.getElementById('dynamic-modal');
+                const content = document.getElementById('dynamic-modal-content');
+                modal.classList.remove('hidden');
+                
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">Registrar Músico</h3>
+                    <form onsubmit="app.createMusician(event)" class="space-y-4">
+                        <input type="text" id="new-mus-name" placeholder="Nombre" required class="w-full border p-2 rounded">
+                        <input type="text" id="new-mus-inst" placeholder="Instrumento" required class="w-full border p-2 rounded">
+                        <input type="text" id="new-mus-phone" placeholder="Teléfono" required class="w-full border p-2 rounded">
+                        <button type="submit" class="w-full bg-gold text-white py-2 rounded font-bold">Guardar</button>
+                    </form>
+                `;
+            }
+
+            async createMusician(e) {
+                e.preventDefault();
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'musicians'), {
+                    name: document.getElementById('new-mus-name').value,
+                    instrument: document.getElementById('new-mus-inst').value,
+                    phone: document.getElementById('new-mus-phone').value,
+                    active: true
+                });
+                this.closeModal('dynamic-modal');
+                this.setAdminTab('musicians');
+            }
+
+            async deleteClient(id) {
+                if(confirm('¿Eliminar cliente?')) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', id));
+                    this.setAdminTab('clients');
+                }
+            }
+
+            async deleteMusician(id) {
+                if(confirm('¿Eliminar músico?')) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'musicians', id));
+                    this.setAdminTab('musicians');
+                }
+            }
+
+            async updateStatus(id, newStatus) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', id), { status: newStatus });
+            }
+
+            async registerPayment(id) {
+                const amount = prompt("Monto a registrar como pagado (acumulativo):");
+                if(amount) {
+                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', id), { paid: Number(amount) });
+                     this.setAdminTab('finance');
+                }
+            }
+            
+            async sendMessage(e, receiver) {
+                e.preventDefault();
+                let inputId = '';
+                if(state.view === 'client-panel') inputId = 'msg-input-client';
+                else if(state.view === 'admin-panel') inputId = 'msg-input-admin';
+                else inputId = 'msg-input-musician';
+
+                const text = document.getElementById(inputId).value;
+                if(!text) return;
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
+                    text,
+                    sender: state.currentUserData.username,
+                    senderName: state.currentUserData.name,
+                    receiver: receiver === 'musicians' ? 'musicians' : (receiver === 'admin' ? 'admin' : state.currentUserData.username), 
+                    timestamp: new Date().toISOString()
+                });
+                
+                document.getElementById(inputId).value = '';
+            }
+
+        }
+
+        // --- Init ---
+        window.app = new App();
+    </script>
+</body>
+</html>
