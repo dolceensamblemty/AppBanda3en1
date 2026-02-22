@@ -1811,26 +1811,52 @@
                 }
             }
 
-            // --- CÓDIGO VIEJO DE TIMELINE CLIENTE Y CUENTA REGRESIVA ---
+            // --- LÓGICA DE CUENTA REGRESIVA CLIENTE ---
 
             startCountdown() {
                 if(!this.state.currentUser) return;
+                
+                // Limpiar intervalo previo para evitar duplicidades de timer al actualizar la vista
+                if(this.countdownInterval) {
+                    clearInterval(this.countdownInterval);
+                    this.countdownInterval = null;
+                }
+
                 const c = this.state.currentUser;
                 const dateStr = c.details?.eventDateConfirm || c.date; 
-                const timeStr = c.details?.eventTime || '12:00'; 
+                const timeStr = c.details?.eventTime || '18:00'; // Default a 18:00
                 
+                if (!dateStr) return;
+
+                // Forzar UTC-6 (Monterrey/CDMX) para precisión exacta
                 const targetDate = new Date(`${dateStr}T${timeStr}:00-06:00`);
 
                 const updateTimer = () => {
                     const now = new Date();
-                    const diff = targetDate - now;
+                    const diff = targetDate.getTime() - now.getTime();
                     
                     const elD = document.getElementById('cd-d');
-                    if(!elD) return; 
+                    const elH = document.getElementById('cd-h');
+                    const elM = document.getElementById('cd-m');
+                    const elS = document.getElementById('cd-s');
+                    const display = document.getElementById('countdown-display');
+
+                    // Detener si salimos de la vista cliente o el DOM cambió
+                    if(!elD || !display) {
+                        clearInterval(this.countdownInterval);
+                        return; 
+                    }
+
+                    // Manejo de fecha inválida (por si el cliente borra la fecha accidentalmente)
+                    if (isNaN(diff)) {
+                        display.innerHTML = '<span class="text-sm font-semibold text-gray-400">Fecha por definir</span>';
+                        clearInterval(this.countdownInterval);
+                        return;
+                    }
                     
                     if (diff <= 0) {
-                        if(this.countdownInterval) clearInterval(this.countdownInterval);
-                        document.getElementById('countdown-display').innerHTML = '<span class="text-3xl font-title font-bold text-brand-gold text-center w-full block animate-pulse">¡Hoy es el gran día!</span>';
+                        clearInterval(this.countdownInterval);
+                        display.innerHTML = '<span class="text-3xl font-title font-bold text-brand-gold text-center w-full block animate-pulse">¡Hoy es el gran día!</span>';
                         return;
                     }
                     
@@ -1840,9 +1866,9 @@
                     const s = Math.floor((diff % (1000 * 60)) / 1000);
                     
                     elD.innerText = d.toString().padStart(2, '0');
-                    document.getElementById('cd-h').innerText = h.toString().padStart(2, '0');
-                    document.getElementById('cd-m').innerText = m.toString().padStart(2, '0');
-                    document.getElementById('cd-s').innerText = s.toString().padStart(2, '0');
+                    elH.innerText = h.toString().padStart(2, '0');
+                    elM.innerText = m.toString().padStart(2, '0');
+                    elS.innerText = s.toString().padStart(2, '0');
                 };
 
                 updateTimer(); 
